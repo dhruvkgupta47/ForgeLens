@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ForgeLens VS Code settings",
+  "type": "object",
+  "properties": {
+    "forgelens.baseUrl": {
+      "type": "string",
+      "default": "http://localhost:8790"
+    },
+    "forgelens.model": {
+      "type": "string",
+      "default": "",
+      "description": "Configured TrueForge model FQN, provider/model"
+    },
+    "forgelens.fallbackModel": {
+      "type": "string",
+      "default": ""
+    },
+    "forgelens.contextBudget": {
+      "type": "number",
+      "default": 8000,
+      "minimum": 512,
+      "maximum": 32000
+    },
+    "forgelens.bridgePort": {
+      "type": "number",
+      "default": 8792,
+      "deprecationMessage": "Ignored: the editor bridge uses an automatically allocated loopback port per window."
+    }
+  }
+}

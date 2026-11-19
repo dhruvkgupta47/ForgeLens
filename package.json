@@ -1,0 +1,84 @@
+{
+  "name": "forgelens",
+  "displayName": "ForgeLens",
+  "description": "Review-first coding agent powered by local TrueForge",
+  "version": "0.1.15",
+  "publisher": "forgelens-team",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.95.0",
+    "node": ">=22.14.0"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCommand:forgelens.open"
+  ],
+  "scripts": {
+    "build": "esbuild src/extension.js --bundle --platform=node --external:vscode --outfile=dist/extension.js",
+    "test": "node --test test/*.test.js",
+    "package": "npm run build && vsce package --allow-missing-repository"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "diff": "^8.0.0",
+    "express": "^5.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.6.0",
+    "esbuild": "^0.25.0"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "forgelens.open",
+        "title": "ForgeLens: Open Agent"
+      },
+      {
+        "command": "forgelens.inline",
+        "title": "ForgeLens: Edit Selection"
+      },
+      {
+        "command": "forgelens.undo",
+        "title": "ForgeLens: Undo Last Applied Hunk"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "forgelens.inline",
+        "key": "ctrl+alt+i",
+        "mac": "cmd+alt+i",
+        "when": "editorHasSelection"
+      }
+    ],
+    "configuration": {
+      "title": "ForgeLens",
+      "properties": {
+        "forgelens.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:8790"
+        },
+        "forgelens.model": {
+          "type": "string",
+          "default": "",
+          "description": "Configured TrueForge model FQN, provider/model"
+        },
+        "forgelens.fallbackModel": {
+          "type": "string",
+          "default": ""
+        },
+        "forgelens.contextBudget": {
+          "type": "number",
+          "default": 8000,
+          "minimum": 512,
+          "maximum": 32000
+        },
+        "forgelens.bridgePort": {
+          "type": "number",
+          "default": 8792,
+          "deprecationMessage": "The editor bridge now uses an automatically allocated loopback port per VS Code window. This setting is ignored."
+        }
+      }
+    }
+  }
+}

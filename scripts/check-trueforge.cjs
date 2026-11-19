@@ -1,0 +1,9 @@
+// Real server contract check. Creates temporary resources and deletes them; no inference or source edits.
+const {ForgeClient}=require('../src/client');const {startBridge}=require('../src/bridge');const {agentSpec}=require('../src/agent');
+(async()=>{const client=new ForgeClient(process.env.TRUEFORGE_BASE_URL||'http://localhost:8790');const name=`forgelens-check-${process.pid}`;let session,bridge;
+try{bridge=await startBridge(18793,{context:async()=>({selected:[]}),search:async()=>[],read:async()=>({text:'test'}),propose:async()=>({reviewed:false}),command:async()=>({exitCode:1})});
+await client.registerConnector({type:'remote',name,url:'http://127.0.0.1:18793/mcp',description:'Temporary ForgeLens contract check',auth:{type:'header',headers:{Authorization:`Bearer ${bridge.token}`}}});console.log('PASS: live connector registration');
+const tools=await client.request(`/mcp-servers/${name}/tools`,undefined,'GET');const serialized=JSON.stringify(tools);for(const tool of ['assemble_context','search_workspace','read_file','propose_edit','run_command'])if(!serialized.includes(tool))throw Error(`Missing tool: ${tool}`);console.log('PASS: TrueForge discovers all five editor MCP tools');
+const models=await client.request('/models',undefined,'GET');if(!models.data.length)throw Error('No configured models');const result=await client.request('/sessions',{agent:{spec:agentSpec(models.data[0].name,name)}});session=result.data.id;console.log('PASS: live session accepts ForgeLens agent specification');
+}finally{if(session)await client.request(`/sessions/${session}`,undefined,'DELETE').catch(e=>console.error('Cleanup:',e.message));if(bridge){try{await client.request(`/settings/mcp-servers/${name}`,undefined,'DELETE').catch(e=>console.error('Cleanup:',e.message));}finally{bridge.close();}}}
+})().catch(e=>{console.error(e.message);process.exitCode=1;});

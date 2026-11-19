@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ForgeLens proposal",
+  "type": "object",
+  "required": [
+    "id",
+    "runId",
+    "path",
+    "before",
+    "current",
+    "exists",
+    "hunks"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "runId": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string",
+      "description": "Workspace relative; realpath validated"
+    },
+    "before": {
+      "type": "string"
+    },
+    "current": {
+      "type": "string"
+    },
+    "exists": {
+      "type": "boolean"
+    },
+    "hunks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "old",
+          "replacement",
+          "status"
+        ],
+        "properties": {
+          "start": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "old": {
+            "type": "string"
+          },
+          "replacement": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected",
+              "discarded"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

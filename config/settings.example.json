@@ -1,0 +1,7 @@
+{
+  "forgelens.baseUrl": "http://localhost:8790",
+  "forgelens.model": "YOUR_PROVIDER/YOUR_MODEL",
+  "forgelens.fallbackModel": "YOUR_SECOND_PROVIDER/YOUR_MODEL",
+  "forgelens.contextBudget": 8000,
+  "forgelens.bridgePort": 8792
+}
