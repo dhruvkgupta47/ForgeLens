@@ -38,3 +38,5 @@ Version 0.1.8 makes inline edits selection-only and blocks severe large-file tru
 Version 0.1.11 adds exact-match edits for existing files, accurate accepted/rejected counts, run-scoped tools, safe stream continuation, and formatter conflict detection. See docs/RELIABILITY-REVIEW.md for checks and remaining limitations.
 
 Version 0.1.14 retains mode-specific inline schemas, suppresses identical reviewed proposals, discards pending controls on cancellation, coordinates in-flight saves, and reports killed commands as failures. See docs/REVIEW-0.1.14.md for the 50-test result and remaining live verification requirements.
+
+Version 0.1.16 refuses multiline shell scripts, redirection, inline interpreter code and common direct-write commands before showing command approval. The agent must use propose_edit for source changes. This conservative guard is not a sandbox: approved test programs can still write files. 53 automated tests pass; provider 503 availability and full Task B model reliability remain external/live limitations.

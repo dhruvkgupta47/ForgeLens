@@ -35,7 +35,7 @@ async function startBridge(port,tools,{inline=false}={}){
     const editSchema=inline?{path:z.string(),content:z.string().max(500000),selectionOnly:z.literal(true)}:{path:z.string(),content:z.string().max(500000).optional(),oldText:z.string().min(1).max(500000).optional(),newText:z.string().max(500000).optional(),selectionOnly:z.boolean().optional()};
     const editDescription=inline?'Replace ONLY the selected text. Required arguments: path, content (complete replacement selection), selectionOnly:true. Surrounding code is preserved. Human reviews every hunk.':'For existing files prefer path, oldText (unique exact text), newText; surrounding code is preserved. Alternatively content is a complete file. Human reviews every hunk.';
     register('propose_edit',editDescription,editSchema,tools.propose,false);
-    register('run_command','Run a command after explicit human approval. Never use this to edit files.',{command:z.string().min(1).max(4000)},tools.command,false);
+    register('run_command','Run a separate test or discovery command after human approval. Shell redirection, multiline scripts and inline code are refused. Use propose_edit to create or edit files.',{command:z.string().min(1).max(4000)},tools.command,false);
     const transport=new StreamableHTTPServerTransport({sessionIdGenerator:undefined});transports.add(transport);
     res.on('close',()=>{transports.delete(transport);void transport.close();void mcp.close();});
     try{await mcp.connect(transport);await transport.handleRequest(req,res,req.body);}catch(e){if(!res.headersSent)res.status(500).json({error:e.message});}

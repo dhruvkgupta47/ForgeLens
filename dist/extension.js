@@ -65281,7 +65281,7 @@ ${entry.text}` }))];
         const editSchema = inline ? { path: z.string(), content: z.string().max(5e5), selectionOnly: z.literal(true) } : { path: z.string(), content: z.string().max(5e5).optional(), oldText: z.string().min(1).max(5e5).optional(), newText: z.string().max(5e5).optional(), selectionOnly: z.boolean().optional() };
         const editDescription = inline ? "Replace ONLY the selected text. Required arguments: path, content (complete replacement selection), selectionOnly:true. Surrounding code is preserved. Human reviews every hunk." : "For existing files prefer path, oldText (unique exact text), newText; surrounding code is preserved. Alternatively content is a complete file. Human reviews every hunk.";
         register("propose_edit", editDescription, editSchema, tools.propose, false);
-        register("run_command", "Run a command after explicit human approval. Never use this to edit files.", { command: z.string().min(1).max(4e3) }, tools.command, false);
+        register("run_command", "Run a separate test or discovery command after human approval. Shell redirection, multiline scripts and inline code are refused. Use propose_edit to create or edit files.", { command: z.string().min(1).max(4e3) }, tools.command, false);
         const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: void 0 });
         transports.add(transport);
         res.on("close", () => {
@@ -65306,6 +65306,19 @@ ${entry.text}` }))];
       } };
     }
     module2.exports = { startBridge: startBridge2 };
+  }
+});
+
+// src/command-policy.js
+var require_command_policy = __commonJS({
+  "src/command-policy.js"(exports2, module2) {
+    function validateCommand2(command2) {
+      if (typeof command2 !== "string" || !command2.trim()) throw Error("Command is empty");
+      if (/[\r\n<>]/.test(command2) || /(?:^|[\s;&|])(?:[^\s]*[\\/])?(?:sh|bash|cmd|powershell|pwsh)(?:\.exe)?\s+(?:-[a-z]*c\b|\/c\b|-(?:command|encodedcommand)\b)/i.test(command2) || /(?:^|\s)(?:-c|-e|--eval|-encodedcommand)\s/i.test(command2) || /\b(?:Set-Content|Add-Content|Out-File|WriteAllText|WriteAllBytes|write_text|write_bytes)\b/i.test(command2)) {
+        throw Error("Command refused: shell redirection, multiline scripts, inline code and file-writing commands must not bypass review. Use propose_edit for file changes, then run a separate test command such as .venv\\Scripts\\python.exe -m pytest tests/test_cli.py -q.");
+      }
+    }
+    module2.exports = { validateCommand: validateCommand2 };
   }
 });
 
@@ -65335,6 +65348,7 @@ var { ForgeClient } = require_client();
 var { agentSpec } = require_agent();
 var { withMinuteLimitRetry } = require_rate_limit();
 var { startBridge } = require_bridge();
+var { validateCommand } = require_command_policy();
 var panel;
 var root;
 var client;
@@ -65628,6 +65642,7 @@ async function review(p) {
 }
 async function command({ command: command2 }) {
   assertActive();
+  validateCommand(command2);
   const run2 = active;
   return new Promise((resolve) => {
     const child = exec(command2, { cwd: root, timeout: 6e4, maxBuffer: 128e3 }, (error, stdout, stderr) => {
@@ -65782,8 +65797,16 @@ async function consume(stream, run2, state = { events: /* @__PURE__ */ new Map()
               denialReason = e.message;
               if (active === run2) status("Proposal rejected: " + e.message);
             }
-          } else if (name === "run_command" || name.endsWith("__run_command")) allow = await vscode.window.showWarningMessage(`Run in workspace: ${args.command}
+          } else if (name === "run_command" || name.endsWith("__run_command")) {
+            try {
+              validateCommand(args.command);
+              allow = await vscode.window.showWarningMessage(`Run in workspace: ${args.command}
 Commands can modify files.`, { modal: true }, "Run") === "Run";
+            } catch (e) {
+              denialReason = e.message;
+              status(e.message);
+            }
+          }
         }
         assertActive(run2);
         await client.request(`/sessions/${run2.session}/turns/${turnId}/events`, { events: [{ type: "user.tool_approval", thread_id: event.thread_id || "main", tool_call_id: ref.id, approval: allow ? { status: "allow" } : { status: "deny", reason: denialReason } }] }, "POST", run2.controller.signal);
