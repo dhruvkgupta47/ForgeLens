@@ -1,0 +1,18 @@
+ForgeLens 0.1.8
+26 extension tests passed; 0 failed.
+Flask repaired workspace: 35 helper tests passed using pytest 9.0.2. Unrelated helpers.py AST matches the original commit outside get_debug_flag. off returns False.
+New tests cover selected-region preservation, wrong-file/stale/full-file inline rejection, severe truncation guard, EOL normalization and actual selected edit/undo. A fresh live inline run remains required.
+
+2026-11-17 / 0.1.9: npm test passed 29/29, including per-minute rate-limit delay, bounded continuation, cancellation, and loopback integration. Live provider recovery not yet verified.
+
+2026-11-17 / 0.1.10: npm test passed 30/30. Observed failed session: repeated deferred discovery and reads, grep unavailable, no proposal. Preload fix preserves approval gates. Task B completion remains unverified.
+
+2026-11-17 / 0.1.11: 41/41 automated tests pass. See docs/RELIABILITY-REVIEW.md for fixes and live-check limitation. Live connector registration passed; discovery from TrueForge back into Codex timed out. No live Task B completion claimed.
+
+2026-11-18 / 0.1.12: 44/44 tests passed. Task C primary live probe returned ECONNREFUSED; fallback live probe returned OK. Hunk acceptance status now commits after application/save settles. Live VS Code Task C is still pending.
+
+2026-11-18 / 0.1.13: 46/46 tests pass. Inline runs expose only required path/content/selectionOnly:true, with no oldText/newText schema or instructions. Cancelled Task C repository verified clean. Live retry remains pending.
+
+2026-11-18 / 0.1.14: 50/50 tests passed. Fixed identical review repetition, cancellation controls, in-flight save races with new runs/undo, and nonnumeric command errors incorrectly reporting exit zero. Task C checkout remains clean. See docs/REVIEW-0.1.14.md for remaining limitations; live valid inline proposal is pending.
+
+2026-11-18 / 0.1.15: 51/51 tests pass. Read/context source is now plain text in separate MCP content blocks, with metadata kept separate. Addresses double-escaped oldText observed in the cancelled Task B session. Exact matching remains strict; live Task B verification pending.
